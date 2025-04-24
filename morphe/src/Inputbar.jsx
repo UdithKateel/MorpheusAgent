@@ -1,23 +1,27 @@
-import { Box, Field, Textarea, defineStyle } from "@chakra-ui/react";
+// Inputbar.jsx
+import { Box, Field, Textarea, defineStyle } from "@chakra-ui/react"
 
-const Inputbar = () => {
+const Inputbar = ({ value, onChange, onKeyDown }) => {
   return (
     <Field.Root>
       <Box pos="relative" w="full">
         <Textarea
           className="peer"
           placeholder=""
-          resize="vertical" // Allow vertical resizing
+          resize="vertical"
           overflowY="auto"
           lineHeight="1.5"
           pr="4"
+          value={value}
+          onChange={onChange}
+          onKeyDown={onKeyDown}
           css={{
             scrollbarWidth: "thin",
             "&::-webkit-scrollbar": {
               width: "6px",
             },
             "&::-webkit-scrollbar-thumb": {
-              background: "#A0AEC0",
+             
               borderRadius: "6px",
             },
           }}
@@ -25,8 +29,8 @@ const Inputbar = () => {
         <Field.Label css={floatingStyles}>Task is ..</Field.Label>
       </Box>
     </Field.Root>
-  );
-};
+  )
+}
 
 const floatingStyles = defineStyle({
   pos: "absolute",
@@ -47,6 +51,6 @@ const floatingStyles = defineStyle({
     top: "-3",
     insetStart: "2",
   },
-});
+})
 
-export default Inputbar;
+export default Inputbar

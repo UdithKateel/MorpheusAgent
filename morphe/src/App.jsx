@@ -1,61 +1,160 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import { Flex , Box, Stack,Center,Separator ,Text} from '@chakra-ui/react'
-import { Button, CloseButton, Drawer, Portal } from "@chakra-ui/react"
-import { IconButton } from '@chakra-ui/react'
-import { TiThMenuOutline } from "react-icons/ti"
-import Sidebar from './Sidebar'
-import Inputbar from './Inputbar'
-import { Heading } from '@chakra-ui/react'
+import { useState, useRef, useEffect } from 'react';
+import {
+  Flex,
+  Box,
+  Text,
+  Heading,
+  Button,
+  CloseButton,
+  Drawer,
+  Portal
+} from '@chakra-ui/react';
+import { TiThMenuOutline } from 'react-icons/ti';
+import Sidebar from './Sidebar';
+import Inputbar from './Inputbar';
+import React from 'react';
+import { FaRegPenToSquare } from "react-icons/fa6";
+import { FaSearch } from "react-icons/fa";
+import { IconButton } from '@chakra-ui/react';
+
 function App() {
-  
-    const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [conversations, setConversations] = useState([]);
+  const [currentChatIndex, setCurrentChatIndex] = useState(null);
+  const endOfMessagesRef = useRef(null);
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+
+    if (currentChatIndex === null) {
+      // Create new conversation
+      const newConv = [input];
+      setConversations([newConv, ...conversations]);
+      setCurrentChatIndex(0);
+    } else {
+      // Append to existing
+      const updated = [...conversations];
+      updated[currentChatIndex] = [...updated[currentChatIndex], input];
+      setConversations(updated);
+    }
+
+    setInput("");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  useEffect(() => {
+    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  useEffect(() => {
+    if (currentChatIndex !== null) {
+      setMessages(conversations[currentChatIndex]);
+    }
+  }, [currentChatIndex, conversations]);
+
+  const isFirstMessage = currentChatIndex === null;
 
   return (
-    <Flex minH="100vh" w="100%" direction="column" >
-  {/* Navbar */}
-  <Flex px="4" pt="4" align="center" justify="start" >
-    <Drawer.Root placement="start" open={open} onOpenChange={(e) => setOpen(e.open)}>
-      <Drawer.Trigger asChild>
-        <Button variant="outline" size="lg">
-          <TiThMenuOutline />
-          Morpheus Agent
-        </Button>
-      </Drawer.Trigger>
-      <Portal>
-        <Drawer.Backdrop />
-        <Drawer.Positioner>
-          <Drawer.Content>
-            <Drawer.Header>
-              <Drawer.Title>Morpheus Agent</Drawer.Title>
-            </Drawer.Header>
-            <Drawer.Body>
-              <Sidebar />
-            </Drawer.Body>
-            <Drawer.CloseTrigger asChild>
-              <CloseButton size="sm" />
-            </Drawer.CloseTrigger>
-          </Drawer.Content>
-        </Drawer.Positioner>
-      </Portal>
-    </Drawer.Root>
-  </Flex>
+    <Flex direction="column" minH="100vh" color="white">
+      {/* Navbar */}
+      <Flex px="4" pt="4" align="center" justify="start" bg="gray.800">
+        <Drawer.Root placement="start" open={open} onOpenChange={(e) => setOpen(e.open)}>
+          <Drawer.Trigger asChild>
+            <Button variant="outline" fontSize="2xl" size="lg">
+              <TiThMenuOutline fontSize={'4em'} />
+              Morpheus Agent
+            </Button>
+          </Drawer.Trigger>
+          <Portal>
+            <Drawer.Backdrop />
+            <Drawer.Positioner>
+              <Drawer.Content>
+                <Drawer.Header>
+                  <Drawer.Title>Morpheus Agent</Drawer.Title>
+                </Drawer.Header>
+                <Drawer.Body>
+                  <Flex p={'10px'} justify={'space-between'}>
+                    <IconButton><FaSearch />
+                    </IconButton>
+                    <IconButton><FaRegPenToSquare /></IconButton>
+                  </Flex>
+                  {conversations.map((conv, index) => (
+                    <Box
+                      key={index}
+                      onClick={() => {
+                        setCurrentChatIndex(index);
+                        setOpen(false);
+                      }}
+                      cursor="pointer"
+                      p={3}
+                      bg={index === currentChatIndex ? "gray.800" : "gray.600"}
+                      mb={2}
+                      borderRadius="md"
+                      _hover={{ bg: "gray.600" }}
+                    >
+                      <Text fontWeight="bold">Chat {conversations.length - index}</Text>
+                      <Text fontSize="sm" isTruncated>
+                        {conv[0]}
+                      </Text>
+                    </Box>
+                  ))}
+                </Drawer.Body>
+                <Drawer.CloseTrigger asChild>
+                  <CloseButton size="sm" />
+                </Drawer.CloseTrigger>
+              </Drawer.Content>
+            </Drawer.Positioner>
+          </Portal>
+        </Drawer.Root>
+      </Flex>
 
-  {/* Main content vertically and horizontally centered */}
-  <Flex flex="1" justify="center" align="center"  minH="calc(100vh - 100px)" >
-    <Stack align="center" spacing={4} w="full" mb={10} >
-      <Heading size="3xl" p={'4px'} color="white" textAlign="center">
-        What can I do for you Today?
-      </Heading>
-      <Box w="full" maxW="600px">
-        <Inputbar />
-      </Box>
-    </Stack>
-  </Flex>
-</Flex>
+      {/* Chat UI */}
+      {isFirstMessage ? (
+        <Flex flex="1" direction="column" align="center" justify="center" px={4} textAlign="center">
+          <Heading size="3xl" mb={6} color="gray.300">
+            What can I do for you Today?
+          </Heading>
+          <Box w="full" maxW="600px">
+            <Inputbar value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} />
+          </Box>
+        </Flex>
+      ) : (
+        <>
+          <Flex flex="1" justify="flex-end" direction="column" overflowY="auto" px={4} py={4} gap={4}>
+            {messages.map((msg, index) => (
+              <React.Fragment key={index}>
+                {/* User message (right) */}
+                <Flex justify="flex-end">
+                  <Box bg="blue.500" p={4} borderRadius="md" color="white" maxW="70%">
+                    {msg}
+                  </Box>
+                </Flex>
 
-  )
+                {/* AI dummy response (left) */}
+                <Flex justify="flex-start">
+                  <Box bg="gray.600" p={4} borderRadius="md" maxW="70%">
+                    Here's a dummy response from your AI agent!
+                  </Box>
+                </Flex>
+              </React.Fragment>
+            ))}
+            <div ref={endOfMessagesRef} />
+          </Flex>
+          <Box px={4} py={3} borderTop="1px solid #444">
+            <Inputbar value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} />
+          </Box>
+        </>
+      )}
+    </Flex>
+  );
 }
 
-export default App
+export default App;
