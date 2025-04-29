@@ -16,6 +16,9 @@ import React from 'react';
 import { FaRegPenToSquare } from "react-icons/fa6";
 import { FaSearch } from "react-icons/fa";
 import { IconButton } from '@chakra-ui/react';
+import {  Dialog, Field, Input, Stack } from "@chakra-ui/react"
+import { BiSolidRightArrow } from "react-icons/bi";
+
 
 function App() {
   const [open, setOpen] = useState(false);
@@ -24,7 +27,8 @@ function App() {
   const [conversations, setConversations] = useState([]);
   const [currentChatIndex, setCurrentChatIndex] = useState(null);
   const endOfMessagesRef = useRef(null);
-
+const [searchopen, searchsetOpen] = useState(false);
+const ref = useRef<HTMLInputElement>(null)
   const handleSend = () => {
     if (!input.trim()) return;
 
@@ -82,9 +86,45 @@ function App() {
                 </Drawer.Header>
                 <Drawer.Body>
                   <Flex p={'10px'} justify={'space-between'}>
-                    <IconButton><FaSearch />
-                    </IconButton>
-                    <IconButton><FaRegPenToSquare /></IconButton>
+                  <Dialog.Root initialFocusEl={() => ref.current} >
+      <Dialog.Trigger asChild>
+        <Button width={'25px'} ><FaSearch /></Button>
+      </Dialog.Trigger>
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content bg="gray.800">
+            <Dialog.Header>
+              <Dialog.Title>Search Task </Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body pb="4">
+              <Stack gap="4">
+                <Field.Root>
+                  
+                  <Input placeholder="Task Name " />
+                </Field.Root>
+              
+              </Stack>
+            </Dialog.Body>
+            <Dialog.Footer>
+              <Dialog.ActionTrigger asChild>
+                <Button variant="outline">Cancel</Button>
+              </Dialog.ActionTrigger>
+              <Button>Search <BiSolidRightArrow /></Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
+                     
+                    <IconButton aria-label="New Chat"
+  onClick={() => {
+    setCurrentChatIndex(null);  // just reset, don't create
+    setInput("");               // optional: clear input box
+    setOpen(false); // optional: close drawer if you want
+  }} >
+                      <FaRegPenToSquare />'
+                      </IconButton>
                   </Flex>
                   {conversations.map((conv, index) => (
                     <Box
@@ -119,7 +159,7 @@ function App() {
       {/* Chat UI */}
       {isFirstMessage ? (
         <Flex flex="1" direction="column" align="center" justify="center" px={4} textAlign="center">
-          <Heading size="3xl" mb={6} color="gray.300">
+          <Heading size="3xl" mb={6} color="gray.100">
             What can I do for you Today?
           </Heading>
           <Box w="full" maxW="600px">
@@ -131,7 +171,7 @@ function App() {
           <Flex flex="1" justify="flex-end" direction="column" overflowY="auto" px={4} py={4} gap={4}>
             {messages.map((msg, index) => (
               <React.Fragment key={index}>
-                {/* User message (right) */}
+                {/* User message (right   ) */}
                 <Flex justify="flex-end">
                   <Box bg="blue.500" p={4} borderRadius="md" color="white" maxW="70%">
                     {msg}

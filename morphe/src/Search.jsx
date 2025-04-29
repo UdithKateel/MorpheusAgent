@@ -4,8 +4,8 @@ import { Button, CloseButton, Dialog, Portal } from "@chakra-ui/react"
 import { useState } from "react"
 import Lorem from "react-lorem-ipsum"
 
-const Demo = () => {
-  const [open, setOpen] = useState(false)
+const Search = ({isopen}) => {
+  const [open, setOpen] = useState(isopen)
   return (
     <Dialog.Root lazyMount open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild>
@@ -36,3 +36,4 @@ const Demo = () => {
     </Dialog.Root>
   )
 }
+export default Search
